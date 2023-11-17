@@ -23,16 +23,12 @@ def internal_calling_clear(unique_id):
     del global_dict[unique_id]
 
 def wrapper(function_name, function_caller, function_params_extractor, function_params):
-    print(function_name, function_caller)
+    # print(function_name, function_caller)
     unique_id = str(uuid.uuid5(uuid.NAMESPACE_DNS, 'nara-executor.com'))
-
-    compiled_code = compile(f"""
-{function_name}
-{function_params_extractor}
-_response = {function_caller}(parameters_array({json.dumps(function_params)}))
-internal_calling_set(unique_id, _response)"
-print(response)
-""")
+    code = f"""{function_name}\n{function_params_extractor}\n_response = {function_caller}(parameters_array({json.dumps(function_params)}))\ninternal_calling_set(unique_id, _response)\nprint(_response)
+    """
+    print(code)
+    compiled_code = compile(code, '<string>', 'exec')
     exec(compiled_code)
 
 
@@ -46,14 +42,15 @@ print(response)
 @app.route("/executor", methods=['POST'])
 def executor():
     data = request.get_json()
-    function_params = data.get("fn_params", {})
+    function_params = data.get("function_params", {})
     function_name = data.get("function_name", "def hello_world():\n  return 'hello world'") or "def hello_world():\n  return 'hello world'"
     function_caller = data.get("function_caller", "hello_world()") or "hello_world()"
     function_params_extractor = data.get("function_params_extractor", "parameters_array = lambda parameters : []") or "parameters_array = lambda parameters : []"
     response = None
     try:
+        print(function_name, function_caller, function_params_extractor, function_params)
         response = wrapper(function_name, function_caller, function_params_extractor, function_params)
-        print(response, global_dict)
+        # print(response, global_dict)
     except Exception as e:
         print(e)
         return { "message": "error" }, 500
