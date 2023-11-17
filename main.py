@@ -26,7 +26,7 @@ def internal_calling_clear(unique_id):
 def wrapper(function_name, function_caller, function_params_extractor, function_params):
     # print(function_name, function_caller)
     unique_id = str(uuid.uuid5(uuid.NAMESPACE_DNS, 'nara-executor.com'))
-    code = f"""{function_name}\n{function_params_extractor}\n_response = {function_caller}(parameters_array({json.dumps(function_params)}))\ninternal_calling_set(unique_id, _response)\nprint(_response)
+    code = f"""{function_name}\n{function_params_extractor}\n_response = {function_caller}(*parameters_array({json.dumps(function_params)}))\ninternal_calling_set(unique_id, _response)\nprint(_response)
     """
     print(code)
     compiled_code = compile(code, '<string>', 'exec')
