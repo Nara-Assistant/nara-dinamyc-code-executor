@@ -2,6 +2,7 @@ import json
 import uuid
 import requests
 from flask import Flask, request
+import sys
 
 app = Flask(__name__)
 
@@ -53,9 +54,10 @@ def executor():
         # print(response, global_dict)
     except Exception as e:
         print(e)
+        sys.stdout.flush()
         return { "message": "error" }, 500
    
-
+    
     return {
        "data": response
     }, 200
